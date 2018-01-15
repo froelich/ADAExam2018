@@ -1,0 +1,619 @@
+TUTORIAL 1:
+
+## With:
+Running this in a 'with' allows the style to be temporary
+with xkcd():
+
+## Display the docstring of a function:
+linspace?
+
+## Python magic:
+%lsmagic
+
+## Can use latex
+
+## can add video/ audio
+
+## interactive plots:
+
+from bokeh.plotting import figure, show, output_notebook
+output_notebook()
+
+N = 500
+x = np.linspace(-10, 10, N)
+y = np.linspace(-10, 10, N)
+xx, yy = np.meshgrid(x, y)
+d = np.sin(xx)*np.cos(yy)
+d = (xx**2 + yy**2)**0.7 - 4.*np.sin(2*xx) - 1.8*np.cos(2*yy)
+
+p = figure(x_range=[-10, 10], y_range=[-10, 10])
+p.image(image=[d], x=[-10], y=[-10], dw=[20], dh=[20], palette="Spectral11")
+
+show(p)
+
+## import txt to json:
+
+tweets_data_path = './Data/twitter_data.txt'
+tweets_data = []
+tweets_file = open(tweets_data_path, "r")
+for line in tweets_file:
+    try:
+        tweet = json.loads(line)
+        tweets_data.append(tweet)
+    except:
+        continue
+        
+## seaborn example:
+
+sns.set(style="ticks", color_codes=True)
+# Plot the text length with horizontal boxes
+ax = sns.boxplot(x="text_len", y="category", data=tweets,
+                 whis=np.inf)
+# Add in points to show each tweet
+sns.stripplot(x="text_len", y="category", data=tweets,
+              jitter=True, size=3, color=".3", linewidth=0)
+# This removes top and right axis
+sns.despine(trim=True)
+
+WEEK 2:
+SQL joins schemas
+
+TUTORIAL 2:
+
+## add index:
+bacteria = pd.Series([632, 1638, 569, 115], 
+    index=['Firmicutes', 'Proteobacteria', 'Actinobacteria', 'Bacteroidetes'])
+    
+## select all index with name:
+bacteria[[name.endswith('bacteria') for name in bacteria.index]]
+
+## column types:
+data.dtypes OR type(data.value)
+
+## series copy:
+vals = data.value.copy()
+
+## drop column:
+data_nomonth = data.drop('month', axis=1)
+
+## import data:
+mb = pd.read_csv("Data/microbiome.csv")
+mb = pd.read_table("Data/microbiome.csv", sep=',')
+pd.read_csv("Data/microbiome.csv", index_col=['Patient','Taxon'])
+pd.read_csv("Data/microbiome.csv", skiprows=[3,4,6])
+pd.read_csv("Data/microbiome.csv", nrows=4)
+pd.read_csv("Data/microbiome.csv", chunksize=14)
+pd.read_csv("Data/microbiome_missing.csv", na_values=['?', -99999])
+
+mb = pd.read_excel('Data/microbiome/MID2.xls', sheetname='Sheet 1', header=None)
+
+## check index unique:
+baseball_newind.index.is_unique
+
+## count number of each value:
+.value_counts()
+
+## change order of rows: (décroissant)
+baseball.reindex(baseball.index[::-1])
+
+## selection:
+baseball_newind[baseball_newind.ab>500]
+baseball_newind.query('ab > 500')
+
+min_ab = 50
+baseball_newind.query('ab > @min_ab')
+
+baseball_newind.loc['gonzalu01ARI2006', ['h','X2b', 'X3b', 'hr']] # line, [columns]
+baseball_newind.iloc[:5, 5:8]
+
+data['phylum'].isin(['Firmicutes', 'Bacteroidetes']) #find lines in phylum that contains Firmi...
+
+hr_total[hr_total.notnull()]
+
+## apply function on selection:
+stats.apply(np.median)
+
+stat_range = lambda x: x.max() - x.min()
+stats.apply(stat_range)
+
+## sorting
+baseball_newind.sort_index() OR baseball_newind.sort_index(ascending=False)
+
+baseball_newind.sort_index(axis=1) #sort columns
+
+baseball.hr.sort_values() #sort one column
+
+baseball[['player','sb','cs']].sort_values(ascending=[False,True], 
+                                           by=['sb', 'cs']).head(10) #sort df by some columns
+                                           
+## ranking:
+baseball.hr.rank(method='first') #first one that appears goes before if ties
+
+## hierarchical index:
+baseball_h = baseball.set_index(['year', 'team', 'player'])$
+
+frame = pd.DataFrame(np.arange(12).reshape(( 4, 3)), 
+                  index =[['a', 'a', 'b', 'b'], [1, 2, 1, 2]], 
+                  columns =[['Ohio', 'Ohio', 'Colorado'], ['Green', 'Red', 'Green']])
+             
+## missing values:
+bacteria2.dropna()
+data.dropna(how='all') #only if all values in row are null OR data.dropna(thresh=5) #with threshold
+
+data.year.fillna(2013, inplace=True) OR bacteria2.fillna(method='bfill')
+
+bacteria2.mean(skipna=False) #not skip
+
+
+## summarization:
+baseball.describe()
+
+extra_bases = baseball[['X2b','X3b','hr']].sum(axis=1) #summary on row not column:
+
+## write to files
+mb.to_csv("mb.csv")
+
+baseball.to_pickle("baseball_pickle") #in binary
+
+## simple distribution
+segments.seg_length.hist(bins=500)
+
+if heavy tail: segments.seg_length.apply(np.log).hist(bins=500)
+
+## date and time
+datetime.strptime(segments.st_time.iloc[0], '%m/%d/%y %H:%M') #parses from expected format
+-> automatically: parse(segments.st_time.iloc[0])
+-> in panda: pd.to_datetime(segments.st_time[:10])
+
+segments.st_time.dt.tz_localize('UTC').dt.tz_convert('US/Eastern').head()
+
+## merging df
+pd.merge(df1, df2) #uses common column name to merge on and does intersection
+-> want to keep things from both: pd.merge(df1, df2, how='outer')
+
+pd.merge(vessels, segments, left_index=True, right_on='mmsi') #to choose on what to merge
+
+## concatenate df
+pd.concat([mb1, mb2], axis=0) #axis=1 is columnwise #add join='inner') for intersection
+
+## stack method rotates the data frame so that columns are represented in rows:
+cdystonia.stack()
+-> opposite: stacked.unstack()
+-> want to do it for one column -> put the others as index:
+(cdystonia.set_index(['patient','site','id','treat','age','sex','week'])['twstrs']
+     .unstack('week').head())
+
+pd.melt(cdystonia_wide, id_vars=['patient','site','id','treat','age','sex'], 
+        var_name='obs', value_name='twsters'
+
+## pivoting:
+
+cdystonia.pivot(index='patient', columns='obs', values='twstrs') #observations = columns, patients = lines and twstrs = values
+
+# pivot_table, creates a spreadsheet-like table with a hierarchical index, and allows the values of the table to be populated using an arbitrary aggregation function.
+cdystonia.pivot_table(index=['site', 'treat'], columns='week', values='twstrs', aggfunc=max)
+
+## cross tabulation:
+pd.crosstab(cdystonia.sex, cdystonia.site)
+
+## duplicate
+--> see: vessels.duplicated(subset='names')
+--> drop: vessels.drop_duplicates(['names'])
+
+## transform values:
+treatment_map = {'Placebo': 0, '5000U': 1, '10000U': 2}
+cdystonia['treatment'] = cdystonia.treat.map(treatment_map)
+OR
+cdystonia2.treat.replace({'Placebo': 0, '5000U': 1, '10000U': 2})
+
+## categories to dummies
+pd.get_dummies(vessels5.type)
+
+## transform column to category:
+cdystonia.treat.astype('category')
+
+## put the data into bins:
+pd.cut(cdystonia.age, [20,30,40,50,60,70,80,90], right=False)[:30]
+-> label the bins: pd.cut(cdystonia.age, [20,40,60,80,90], labels=['young','middle-aged','old','really old'])[:30]
+-> cut in quartiles: pd.qcut(cdystonia.age, 4)[:30]
+
+## permute a df (segments):
+new_order = np.random.permutation(len(segments))
+segments.take(new_order).head()
+
+## sampling:
+vessels.sample(n=10, replace=True)
+
+## groupby:
+cdystonia.groupby(cdystonia.patient)
+--> keep mean of each group: cdystonia_grouped.agg(np.mean)
+--> on multiple keys: cdystonia.groupby(['week','site']).mean()
+--> groupby and apply function top: segments_merged.groupby('mmsi').apply(top, column='seg_length', n=3)[['names', 'seg_length']]
+
+HOMEWORK 0
+
+## pie chart with percentages:
+pie(intents, labels=[i+"(%.2f%%)" % j for i,j in intents.items()]);
+
+HOMEWORK 1
+
+## get line before:
+frameSLDeathsNA.National.shift(1)
+
+## merge multiple dataframes:
+import functools as ft
+mbs_merged = ft.reduce(lambda left,right: pd.merge(left,right,left_index=True, right_index=True, how='outer'), mbs)
+mbs_merged.head()
+
+## create multiple levels index:
+header = pd.MultiIndex.from_product([['NEC1','control1','NEC2','control2'],
+                                     ['tissue','stool']],
+                                    names=['Test','Type'])
+
+## check nan or number:
+from numpy import issubdtype, number
+print('All entries are either a number or nan:', issubdtype(mbs_nans.dtypes.all(), number))
+
+## display HTML
+from IPython.core.display import HTML
+HTML(filename=DATA_FOLDER+'/titanic.html')
+
+## print with variables:
+print("%s (%s) values: " % (col, data[col].dtype), end='')
+
+## multiple barplots:
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2, sharey=True, figsize=(15,15))
+sns.countplot(x="pclass", data=passengers, ax=ax1);
+sns.countplot(x='embarked', data=passengers, ax=ax2);
+sns.countplot(x='sex', data=passengers, ax=ax3);
+
+## zip() returns list of tuple
+
+## barplot with multiple bars and stacked:
+fig, ax = plt.subplots(figsize=(10,5))
+width = 0.25
+for i, (grp_lab, grp) in enumerate(passengers.groupby(["pclass", "sex"]).survived):
+    shift = (grp_lab[1]=='female')*(width+0.01)
+    down = plt.bar(grp_lab[0]+shift, grp.value_counts()[0], width, color=colors[0])
+    up = plt.bar(grp_lab[0]+shift, grp.value_counts()[1], width, bottom=grp.value_counts()[0], color=colors[1])
+
+# Using minor ticks to represent subgroups
+ax.minorticks_on()
+
+# Get location of the center of each rectangle, and location of the center of each group
+min_ticks = [r.get_x()+r.get_width()/2 for i, r in enumerate(ax.patches) if i%2]
+cols = iter(min_ticks)
+maj_ticks = [(a+b)/2 for a, b in zip(cols, cols)]
+
+# Sets the minor and major ticks 
+ax.set_xticks(min_ticks, minor = True)
+ax.set_xticks(maj_ticks)
+new_ticks = ["F", "M", "F", "M", "F", "M"]
+from matplotlib import ticker
+ax.xaxis.set_minor_formatter(ticker.FixedFormatter(new_ticks))
+ax.set_xticklabels(["1st Class", "2nd Class", "3rd Class"])
+ax.tick_params(axis='x', which='major', pad=15)
+
+ax.set_title('Survival count per class, per sex')
+ax.set_ylabel('Count')
+plt.legend(['Died', 'Survived'], loc='upper left');
+
+WEEK 4: distributions and statistic tests
+
+TUTORIAL 3 - Data From the web:
+
+# HTML request:
+r = requests.get('https://httpbin.org/ip')
+print('Response status code: {0}\n'.format(r.status_code))
+print('Response headers: {0}\n'.format(r.headers))
+print('Response body: {0}'.format(r.text))
+
+--> if json:
+r = requests.get('https://now.httpbin.org/')
+r.json()
+
+--> post:
+payload = {'key1': 'value1', 'key2': 'value2'}
+r = requests.post('https://httpbin.org/post', data=payload)
+r.json()
+
+# parse html:
+soup = BeautifulSoup(r.text, 'html.parser')
+soup.h1
+soup.title.string
+
+# find links in a page:
+all_links = soup.find_all('a')
+
+# take all lines:
+publications_wrappers = soup.find_all('li', class_='entry')
+
+--> all lines titles:
+for p in publications_wrappers:
+    print(p.find('span', class_='title').text)
+    
+# dataframe from dict:
+publications = pd.DataFrame.from_dict(publications_list)
+
+# WEEK 5 - Observational studies: random, natural and observational studies
+
+# HOMEWORK 2 - Data from the web:
+
+# use multi-processing:
+with mp.Pool(mp.cpu_count()) as p:
+    for req_id, counts in p.map(resp_to_counts, done):
+        data1[req_id].update(counts)
+
+# from string to number:
+uni_s1["rank"] = uni_s1["rank"].str.extract('(\d+)', expand=False).astype(int)
+
+# create column from function on others:
+uni_s1['staff_student_ratio'] = uni_s1.apply(lambda row: row.fac_c_total/row.stu_c_total, axis=1)
+
+# join two datasets:
+uni_m = uni_s1.join(uni_s2.loc[id_n2[:N]].reset_index(drop=True), rsuffix="_2")
+
+# sort values:
+df.sort_values(var, ascending=False).head(n)
+
+# WEEK 6 - Data Visualization:
+Heavy-tailed data: power laws -> Smart trick for plotting CCDF of any distribution:
+x-axis: data sorted in ascending order
+y-axis: (n:1)/n (where n is number of data points)
+
+# TUTORIAL - Data Visualization: explain how to create github web page
+
+# create map: m = folium.Map(location=lausanne_coord)
+-> add a marker: folium.Marker(epfl_location, popup="EPFL").add_to(m)
+
+# load and add geojson:
+state_geo_path = r'us-states.json'
+geo_json_data = json.load(open(state_geo_path))
+folium.GeoJson(geo_json_data).add_to(m_usa)
+
+--> apply function on map
+results_map = folium.Map([43,-100], tiles='cartodbpositron', zoom_start=4)
+folium.GeoJson(
+    geo_json_data,
+    style_function=lambda feature: {
+        'fillColor': us_election_colors(feature['id']),
+        'color' : 'black',
+        'weight' : 2,
+        'dashArray' : '5, 5'
+        }
+    ).add_to(results_map)
+
+# chloropleth map: to draw depending on percentage or value:
+us_map = folium.Map(location=[48, -102], zoom_start=3)
+us_map.choropleth(geo_data=geo_json_data, data=state_winner_data,
+             columns=['State', 'Percentage'],
+             key_on='feature.id',
+             fill_color='BuPu', fill_opacity=0.7, line_opacity=0.2,
+             legend_name='Percentage for winner of general election (%)')
+us_map
+
+--> to save: us_map.save('US_Election_2016.html')
+
+# HOMEWORK 3 - Data Vizualisation:
+
+# add link in markdown:
+**Link to the viewer for proper map rendering**: [HERE](https://nbviewer.jupyter.org/github/ChristianMct/ADA2017-Homeworks/blob/master/03%20-%20Interactive%20Viz/hw3.ipynb)
+
+# pivot table to plot:
+age_cat = ur_age.pivot_table(index="cant", columns="age_cat").sort_values(("rate","25-49 ans"), ascending=False)
+f, ax = pp.subplots(figsize=(15, 5))
+age_cat.plot(kind='bar', ax=ax, title="Unemployment rate par age class", legend=True, fontsize=12)
+ax.set_ylabel("Unemployment rate", fontsize=12)
+ax.tick_params(axis='x', which='major', pad=15)
+ax.legend([a for r,a in age_cat.columns.values])
+display(f)
+pp.close(f)
+
+# Week 7 - Supervised learning:
+
+#bias = expected difference between predictions and truth
+#variance= variance of the estimates (between estimates)
+# too much variance -> overfitting, too much bias -> underfitting
+# expected error = bias^2 + variance
+# for knn: small k -> low bias, high variance, big k: opposite
+# leave-one-out cross-validation (LOO):  Break data into train and test subsets, e.g. 80-20 % random split
+# As tree depth increases, bias decreases and variance generally increases
+
+# WEEK 8 - Scaling Up:
+{1,2,3}.map(lambda x: x*2) → {2,4,6}
+{1,2,3}.filter(lambda x: x <= 2) → {1,2}
+{1,2,3}.flatMap(lambda x: [x,x*10]) → {1,10,2,20,3,30}
+{(1,a), (2,b), (1,c)}.groupByKey() → {(1,[a,c]), (2,[b])}
+{(1,a), (2,b), (1,c)}.reduceByKey(lambda (x,y): x+y)
+→ {(1,ac), (2,b)}
+
+# WEEK 9 - Applied ML
+Features with large values dominate the others, and the classifier tend to over-optimize them
+
+# TUTORIAL - cluster and spark:
+import json
+import re
+from pyspark.sql import *
+from pyspark import SparkContext, SQLContext
+
+# context initialization
+sc = SparkContext()
+sqlContext = SQLContext(sc)
+
+# regex to get one word
+word_regex = re.compile(r'(\w+)')
+
+# read the input file line by line
+text_file = sc.textFile("frankenstein.txt")
+
+
+# convert a text line to words vector
+def get_line_words(line):
+    return word_regex.findall(line.lower())
+
+
+counts_rdd = text_file.flatMap(get_line_words) \
+    .map(lambda word: (word, 1)) \
+    .reduceByKey(lambda a, b: a + b) \
+    .sortBy(lambda wc: -wc[1])
+
+# convert to dataframe
+counts = sqlContext.createDataFrame(counts_rdd.map(lambda wc: Row(word=wc[0], count=wc[1])))
+
+# view the content of the dataframe
+counts.show()
+
+# get 3 row for the dataframe
+top3 = counts.take(3)
+print("Top 3 words:")
+for w in top3:
+    print(w)
+
+# save to json
+counts.write.json("frankenstein_words_count.txt")
+
+# simple plot from df:
+data.plot(kind='scatter', x='TV', y='sales', ax=axs[0], figsize=(16, 8), grid=True)
+
+# linear regression:
+lr = LinearRegression()
+# cross_val_predict returns an array of the same size as `y` where each entry
+# is a prediction obtained by cross validation:
+predicted = cross_val_predict(lr, X, y, cv=5)
+
+--> precision and recall:
+precision = cross_val_score(logistic, X, y, cv=10, scoring="precision")
+recall = cross_val_score(logistic, X, y, cv=10, scoring="recall")
+
+--> proba:
+pred = logistic.predict_proba(X)
+
+# create new column from another:
+data["race"] = "white"
+data.loc[data['black'] == 1,'race'] = "black"
+
+# logistic regression:
+logistic = linear_model.LogisticRegression()
+feature_cols = ['age', 'educ', 'black', 'hispan', 'married', 'nodegree', 're74', 're75']
+propensity = logistic.fit(data[feature_cols].values, data['treat'].values)
+data['propensity'] = propensity.predict_proba(data[feature_cols].values)[:,1]
+
+# matching:
+group2 = data.groupby('treat')
+group20 = group2.get_group(0).reset_index()
+group21 = group2.get_group(1).reset_index()
+
+def dist(a, b):
+    return (a-b)*(a-b)
+
+#costs = np.array([dist(, n) for n in group21["propensity"]])
+costs = np.array([np.array([0.0]*len(group21["propensity"]))]*len(group20["propensity"]))
+
+
+for i, p0 in enumerate(group20["propensity"]):
+    for j, p1 in enumerate(group21["propensity"]):
+        costs[i][j] = dist(p0, p1)
+        
+
+print("Computing optimal assigment... ", end="")
+id_n1, id_n2 = linear_sum_assignment(costs)
+sol_costs = costs[id_n1, id_n2]
+print("Done: cost of solution = %f" % sol_costs.sum())
+
+match = group21.loc[id_n2].reset_index(drop=True).join(group20.loc[id_n1].reset_index(drop=True), rsuffix="_notreat")
+match["prop_diff"] = dist(match["propensity_notreat"],match["propensity"])
+
+# create tdfidf vectors:
+vectorizer = TfidfVectorizer(stop_words='english')
+vectors = vectorizer.fit_transform(newsgroups.data)
+
+# dataset splitting:
+#We seperate the training dataset from the rest, as a result we obtain the TF-IDF vectors belonging 
+#to the training vectors as well as their corresponding label, namely the nesgroups targets. 
+#We choose to use random_state=None as it means it will use np.random thus the training set is picked randomly.
+labels_training,\
+labels_tmp,\
+vectors_training,\
+vectors_tmp= train_test_split(newsgroups.target, vectors, test_size=0.2, random_state=None)
+
+#We now seperate the tmp set with corresponding labels randomly in half to obtain the testing and validation sets
+labels_testing,\
+labels_validation,\
+vectors_testing,\
+vectors_validation = train_test_split(labels_tmp, vectors_tmp, test_size=0.1, random_state=None)
+
+# random forrest:
+clf = RandomForestClassifier()
+
+# gridsearch: voir tools
+
+--> use classifier:
+classifier=RandomForestClassifier(max_depth=30, n_estimators=2500, n_jobs=-1, random_state=None)
+classifier.fit(vectors_training, labels_training)
+
+prediction = classifier.predict(vectors_testing)
+
+--> confusion matrix
+--> feature importance: 
+sorted_index = np.argsort(classifier.feature_importances_)
+best10 = sorted_index[-1:-11:-1]
+features = np.array(vectorizer.get_feature_names())[best10]
+importances = classifier.feature_importances_[best10]
+
+
+## Handling text:
+
+# read text
+with codecs.open(os.path.join(corpus_root,book_file),encoding="utf8") as f: # use codecs for a variety of encodings
+            books.append(f.read())
+            
+# getting rid of new lines and all extra white space
+books = [" ".join(b.split()) for b in books]
+
+# let's get all chars and their frequency
+fdist1 = nltk.FreqDist(books[0])
+
+# tokenize:
+books_token = [nltk.word_tokenize(b) for b in books]
+
+# words frequency:
+fdist2 = nltk.FreqDist(books_token[0])
+
+# Collocations (n-grams)
+finder = nltk.collocations.BigramCollocationFinder.from_words(books_token[0])
+bigram_measures = nltk.collocations.BigramAssocMeasures()
+# explore measures for different outcomes!
+finder.nbest(bigram_measures.pmi, 10)
+
+# stem and lemmatize
+porter = nltk.PorterStemmer()
+wnl = nltk.WordNetLemmatizer()
+books_stem = [[porter.stem(t) for t in b] for b in books_token]
+books_pos = [nltk.pos_tag(b) for b in books_token]
+books_lem = [[wnl.lemmatize(t,pos=get_wordnet_pos(p[1])) for t,p in zip(b,bp)] for b,bp in zip(books_token,books_pos)]
+
+# get sentences
+dracula_sentences = our_books.sents('DRACULA.txt')
+
+# Run a SVD directly
+n_topics = 5
+U,S,_ = np.linalg.svd(matrix.T)
+sentence_vectors = U[:,:n_topics]
+print(sum(S[:n_topics])/sum(S)) # explained variance of the model
+
+# PCA and plot
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X=U)
+which_sentences = [6,7,8,9,10,11]
+
+# draw a graph
+pos = nx.spring_layout(lesmis)
+ec = nx.draw_networkx_edges(lesmis, pos, alpha=0.2)
+nc = nx.draw_networkx_nodes(lesmis, pos, nodelist=lesmis.nodes(), node_color=[lesmis.nodes[n]["louvain"] for n in lesmis.nodes], 
+                            with_labels=False, node_size=100, cmap=plt.cm.jet)
+plt.axis('off')
+plt.show()
+
+
+
